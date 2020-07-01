@@ -287,4 +287,12 @@ public interface WorkflowService {
      * @return {@link ExternalStorageLocation} containing the uri and the path to the payload is stored in external storage
      */
     ExternalStorageLocation getExternalStorageLocation(String path, String operation, String payloadType);
+
+    /**
+     * Update workflow instance priority
+     *
+     * @param workflowId WorkflowId of the workflow.
+     * @param priority   priority min:0 max:99
+     */
+    void updateWorkflowPriority(String workflowId, int priority);
 }

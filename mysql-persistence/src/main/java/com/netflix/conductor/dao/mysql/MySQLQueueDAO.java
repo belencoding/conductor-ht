@@ -69,14 +69,14 @@ public class MySQLQueueDAO extends MySQLBaseDAO implements QueueDAO {
     @Override
     public List<String> pop(String queueName, int count, int timeout) {
         List<Message> messages = getWithTransactionWithOutErrorPropagation(tx -> popMessages(tx, queueName, count, timeout));
-        if(messages == null) return new ArrayList<>();
+        if (messages == null) return new ArrayList<>();
         return messages.stream().map(Message::getId).collect(Collectors.toList());
     }
 
     @Override
     public List<Message> pollMessages(String queueName, int count, int timeout) {
         List<Message> messages = getWithTransactionWithOutErrorPropagation(tx -> popMessages(tx, queueName, count, timeout));
-        if(messages == null) return new ArrayList<>();
+        if (messages == null) return new ArrayList<>();
         return messages;
     }
 
@@ -152,7 +152,7 @@ public class MySQLQueueDAO extends MySQLBaseDAO implements QueueDAO {
 
     /**
      * Un-pop all un-acknowledged messages for all queues.
-
+     *
      * @since 1.11.6
      */
     public void processAllUnacks() {
@@ -178,6 +178,14 @@ public class MySQLQueueDAO extends MySQLBaseDAO implements QueueDAO {
 
         return queryWithTransaction(SET_OFFSET_TIME, q -> q.addParameter(offsetTimeInSecond)
                 .addParameter(offsetTimeInSecond).addParameter(queueName).addParameter(messageId).executeUpdate() == 1);
+    }
+
+    @Override
+    public void updatePriority(List<String> messageIds, int priority) {
+        final String UPDATE_PRIORITY = String.format(
+                "UPDATE queue_message SET priority = ? WHERE message_id in (%s) AND popped = false",
+                Query.generateInBindings(messageIds.size()));
+        queryWithTransaction(UPDATE_PRIORITY, q -> q.addParameter(priority).addParameters(messageIds).executeUpdate());
     }
 
     private boolean existsMessage(Connection connection, String queueName, String messageId) {

@@ -254,4 +254,9 @@ public class DynoQueueDAO implements QueueDAO {
         return queue.setTimeout(id, 0);
 
     }
+
+    @Override
+    public void updatePriority(List<String> messageIds, int priority) {
+
+    }
 }

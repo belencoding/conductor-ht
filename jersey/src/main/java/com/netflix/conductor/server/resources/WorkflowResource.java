@@ -31,6 +31,8 @@ import io.swagger.annotations.ApiOperation;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -246,5 +248,15 @@ public class WorkflowResource {
     @Path("/externalstoragelocation")
     public ExternalStorageLocation getExternalStorageLocation(@QueryParam("path") String path, @QueryParam("operation") String operation, @QueryParam("payloadType") String payloadType) {
         return workflowService.getExternalStorageLocation(path, operation, payloadType);
+    }
+
+    @POST
+    @Path("/update/{workflowId}/{priority}")
+    @Consumes(MediaType.WILDCARD)
+    @ApiOperation("update workflow instance priority")
+    public String startWorkflow(@PathParam("workflowId") String workflowId,
+                                @PathParam("priority") @DefaultValue("0") @Min(0) @Max(99) Integer priority) {
+        workflowService.updateWorkflowPriority(workflowId, priority);
+        return workflowId;
     }
 }

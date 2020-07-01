@@ -55,14 +55,8 @@ import com.netflix.conductor.dao.MetadataDAO;
 import com.netflix.conductor.dao.QueueDAO;
 import com.netflix.conductor.metrics.Monitors;
 import com.netflix.conductor.service.ExecutionLockService;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -1553,6 +1547,35 @@ public class WorkflowExecutor {
                             String reason = String.format("Invalid task specified. Cannot find task by name %s in the task definitions", task.getWorkflowTask().getName());
                             return new TerminateWorkflowException(reason);
                         }));
+    }
+
+    public void updateWorkflowPriority(String workflowId, int priority) {
+        try {
+            executionLockService.acquireLock(workflowId, 60000);
+            Workflow workflow = executionDAOFacade.getWorkflowById(workflowId, true);
+            if (workflow.getStatus().isTerminal()) {
+                throw new ApplicationException(CONFLICT, "Workflow id " + workflowId + " has ended, status cannot be updated.");
+            }
+            if (workflow.getPriority() == priority) {
+                return;        // same priority!
+            }
+            workflow.setPriority(priority);
+            executionDAOFacade.updateWorkflow(workflow);
+            List<Task> tasks = workflow.getTasks();
+            if (tasks != null && tasks.size() > 0) {
+                List<String> messageIds = new ArrayList<>();
+                for (Task task : tasks) {
+                    if (SCHEDULED == task.getStatus()) {
+                        messageIds.add(task.getTaskId());
+                    }
+                }
+                if (messageIds.size() > 0) {
+                    queueDAO.updatePriority(messageIds, priority);
+                }
+            }
+        } finally {
+            executionLockService.releaseLock(workflowId);
+        }
     }
 
     private boolean updateParentWorkflow(Workflow subWorkflow) {

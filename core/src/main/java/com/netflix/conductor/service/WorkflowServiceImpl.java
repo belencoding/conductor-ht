@@ -73,7 +73,7 @@ public class WorkflowServiceImpl implements WorkflowService {
      */
     @Service
     public String startWorkflow(StartWorkflowRequest startWorkflowRequest) {
-        return startWorkflow(startWorkflowRequest.getName(), startWorkflowRequest.getVersion(), startWorkflowRequest.getCorrelationId(), startWorkflowRequest.getInput(),
+        return startWorkflow(startWorkflowRequest.getName(), startWorkflowRequest.getVersion(), startWorkflowRequest.getCorrelationId(), startWorkflowRequest.getPriority(), startWorkflowRequest.getInput(),
                 startWorkflowRequest.getExternalInputPayloadStoragePath(), startWorkflowRequest.getTaskToDomain(), startWorkflowRequest.getWorkflowDef());
     }
 
@@ -106,7 +106,7 @@ public class WorkflowServiceImpl implements WorkflowService {
      * @param input                           Input to the workflow you want to start.
      * @param externalInputPayloadStoragePath
      * @param taskToDomain
-     * @param workflowDef                      - workflow definition
+     * @param workflowDef                     - workflow definition
      * @return the id of the workflow instance that can be use for tracking.
      */
     @Service
@@ -172,7 +172,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Service
     public String startWorkflow(String name, Integer version, String correlationId, Integer priority,
                                 Map<String, Object> input) {
-        WorkflowDef workflowDef = metadataService.getWorkflowDef( name, version );
+        WorkflowDef workflowDef = metadataService.getWorkflowDef(name, version);
         if (workflowDef == null) {
             throw new ApplicationException(ApplicationException.Code.NOT_FOUND, String.format("No such workflow found by name: %s, version: %d", name, version));
         }
@@ -449,5 +449,15 @@ public class WorkflowServiceImpl implements WorkflowService {
             LOGGER.error("Invalid input - Operation: {}, PayloadType: {}, defaulting to WRITE/WORKFLOW_INPUT", operation, type);
             return executionService.getExternalStorageLocation(ExternalPayloadStorage.Operation.WRITE, ExternalPayloadStorage.PayloadType.WORKFLOW_INPUT, path);
         }
+    }
+
+    /**
+     * Update workflow instance
+     *
+     * @param workflowId WorkflowId of the workflow.
+     * @param priority   priority min:0 max:99
+     */
+    public void updateWorkflowPriority(String workflowId, int priority) {
+        workflowExecutor.updateWorkflowPriority(workflowId, priority);
     }
 }
