@@ -63,7 +63,7 @@ public class TaskResource {
 	@Path("/poll/{tasktype}")
 	@ApiOperation("Poll for a task of a certain type")
 	@Consumes({MediaType.WILDCARD})
-	public Task poll(@PathParam("tasktype") String taskType,
+	public synchronized Task poll(@PathParam("tasktype") String taskType,
 					 @QueryParam("workerid") String workerId,
 					 @QueryParam("domain") String domain) {
 		return taskService.poll(taskType, workerId, domain);
