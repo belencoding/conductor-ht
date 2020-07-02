@@ -2,6 +2,12 @@ dependencies {
 
     compile project(':conductor-common')
 
+    // https://mvnrepository.com/artifact/org.springframework.amqp/spring-rabbit
+    compile group: 'org.springframework.amqp', name: 'spring-rabbit', version: '2.2.6.RELEASE'
+
+    // https://mvnrepository.com/artifact/com.alibaba/fastjson
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.60'
+
     compile "io.reactivex:rxjava:${revRxJava}"
     compile "com.google.inject:guice:${revGuice}"
     compile "com.google.inject.extensions:guice-multibindings:${revGuiceMultiBindings}"

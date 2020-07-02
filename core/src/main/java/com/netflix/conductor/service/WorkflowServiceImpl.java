@@ -73,7 +73,12 @@ public class WorkflowServiceImpl implements WorkflowService {
      */
     @Service
     public String startWorkflow(StartWorkflowRequest startWorkflowRequest) {
-        return startWorkflow(startWorkflowRequest.getName(), startWorkflowRequest.getVersion(), startWorkflowRequest.getCorrelationId(), startWorkflowRequest.getPriority(), startWorkflowRequest.getInput(),
+        Integer priority = startWorkflowRequest.getPriority();
+        if (priority == null) {
+            priority = 0;
+        }
+
+        return startWorkflow(startWorkflowRequest.getName(), startWorkflowRequest.getVersion(), startWorkflowRequest.getCorrelationId(), priority, startWorkflowRequest.getInput(),
                 startWorkflowRequest.getExternalInputPayloadStoragePath(), startWorkflowRequest.getTaskToDomain(), startWorkflowRequest.getWorkflowDef());
     }
 
