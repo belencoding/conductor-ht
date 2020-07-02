@@ -254,8 +254,8 @@ public class WorkflowResource {
     @Path("/update/{workflowId}/{priority}")
     @Consumes(MediaType.WILDCARD)
     @ApiOperation("update workflow instance priority")
-    public String startWorkflow(@PathParam("workflowId") String workflowId,
-                                @PathParam("priority") @DefaultValue("0") @Min(0) @Max(99) Integer priority) {
+    public String updateWorkflowPriority(@PathParam("workflowId") String workflowId,
+                                         @PathParam("priority") @DefaultValue("0") @Min(0) @Max(99) Integer priority) {
         workflowService.updateWorkflowPriority(workflowId, priority);
         return workflowId;
     }
