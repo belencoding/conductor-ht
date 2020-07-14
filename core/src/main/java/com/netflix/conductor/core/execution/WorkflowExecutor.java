@@ -600,10 +600,10 @@ public class WorkflowExecutor {
         taskToBeRetried.setReasonForIncompletion(null);
 
         // perform parameter replacement for retried task
-        Map<String, Object> taskInput = parametersUtils.getTaskInput(taskToBeRetried.getWorkflowTask().getInputParameters(),
-            workflow, taskToBeRetried.getWorkflowTask().getTaskDefinition(), taskToBeRetried.getTaskId());
-        taskToBeRetried.getInputData().putAll(taskInput);
-
+//        Map<String, Object> taskInput = parametersUtils.getTaskInput(taskToBeRetried.getWorkflowTask().getInputParameters(),
+//            workflow, taskToBeRetried.getWorkflowTask().getTaskDefinition(), taskToBeRetried.getTaskId());
+//        taskToBeRetried.getInputData().putAll(taskInput);
+        taskToBeRetried.getInputData().putAll(task.getInputData());
         task.setRetried(true);
         // since this task is being retried and a retry has been computed, task lifecycle is complete
         task.setExecuted(true);
