@@ -253,6 +253,7 @@ public class WorkflowResource {
     @POST
     @Path("/update/{workflowId}/{priority}")
     @Consumes(MediaType.WILDCARD)
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
     @ApiOperation("update workflow instance priority")
     public String updateWorkflowPriority(@PathParam("workflowId") String workflowId,
                                          @PathParam("priority") @DefaultValue("0") @Min(0) @Max(99) Integer priority) {
