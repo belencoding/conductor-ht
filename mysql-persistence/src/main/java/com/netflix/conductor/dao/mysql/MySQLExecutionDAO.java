@@ -178,7 +178,9 @@ public class MySQLExecutionDAO extends MySQLBaseDAO implements ExecutionDAO, Rat
 
         String taskId = task.getTaskId();
 
-        List<String> tasksInProgressInOrderOfArrival = findAllTasksInProgressInOrderOfArrival(task, limit);
+//        List<String> tasksInProgressInOrderOfArrival = findAllTasksInProgressInOrderOfArrival(task, limit);
+
+        List<String> tasksInProgressInOrderOfArrival = findAllTasksInProgressInOrderOfArrival(taskId);
 
         boolean rateLimited = !tasksInProgressInOrderOfArrival.contains(taskId);
 
@@ -729,6 +731,13 @@ public class MySQLExecutionDAO extends MySQLBaseDAO implements ExecutionDAO, Rat
 
         return queryWithTransaction(GET_IN_PROGRESS_TASKS_WITH_LIMIT,
                 q -> q.addParameter(task.getTaskDefName()).addParameter(limit).executeScalarList(String.class));
+    }
+
+    private List<String> findAllTasksInProgressInOrderOfArrival(String taskId) {
+        String GET_IN_PROGRESS_TASKS_WITH_LIMIT = "SELECT task_id FROM task_in_progress WHERE task_id = ?";
+
+        return queryWithTransaction(GET_IN_PROGRESS_TASKS_WITH_LIMIT,
+                q -> q.addParameter(taskId).executeScalarList(String.class));
     }
 
     private void validate(Task task) {
