@@ -182,7 +182,10 @@ public class MySQLExecutionDAO extends MySQLBaseDAO implements ExecutionDAO, Rat
 
         List<String> tasksInProgressInOrderOfArrival = findAllTasksInProgressInOrderOfArrival(taskId);
 
-        boolean rateLimited = !tasksInProgressInOrderOfArrival.contains(taskId);
+        boolean rateLimited = false;
+        if (tasksInProgressInOrderOfArrival != null && tasksInProgressInOrderOfArrival.size() > 0) {
+            rateLimited = !tasksInProgressInOrderOfArrival.contains(taskId);
+        }
 
         if (rateLimited) {
             logger.info("Task execution count limited. {}, limit {}, current {}", task.getTaskDefName(), limit,
