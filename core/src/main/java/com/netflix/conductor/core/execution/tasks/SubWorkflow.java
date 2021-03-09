@@ -82,6 +82,7 @@ public class SubWorkflow extends WorkflowSystemTask {
 			wfInput = input;
 		}
 		String correlationId = workflow.getCorrelationId();
+		Integer priority = workflow.getPriority();
 
 		try {
 			String subWorkflowId = null;
@@ -91,7 +92,7 @@ public class SubWorkflow extends WorkflowSystemTask {
 						wfInput,
 						null,
 						correlationId,
-						0,
+						priority,
 						workflow.getWorkflowId(),
 						task.getTaskId(),
 						null,
@@ -103,6 +104,7 @@ public class SubWorkflow extends WorkflowSystemTask {
 						wfInput,
 						null,
 						correlationId,
+						priority,
 						workflow.getWorkflowId(),
 						task.getTaskId(),
 						null,

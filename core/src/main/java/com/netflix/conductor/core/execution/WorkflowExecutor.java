@@ -19,8 +19,7 @@ import static com.netflix.conductor.common.metadata.tasks.Task.Status.IN_PROGRES
 import static com.netflix.conductor.common.metadata.tasks.Task.Status.SCHEDULED;
 import static com.netflix.conductor.common.metadata.tasks.Task.Status.SKIPPED;
 import static com.netflix.conductor.common.metadata.tasks.Task.Status.valueOf;
-import static com.netflix.conductor.common.metadata.workflow.TaskType.SUB_WORKFLOW;
-import static com.netflix.conductor.common.metadata.workflow.TaskType.TERMINATE;
+import static com.netflix.conductor.common.metadata.workflow.TaskType.*;
 import static com.netflix.conductor.core.execution.ApplicationException.Code.CONFLICT;
 import static com.netflix.conductor.core.execution.ApplicationException.Code.INVALID_INPUT;
 import static com.netflix.conductor.core.execution.ApplicationException.Code.NOT_FOUND;
@@ -1550,31 +1549,32 @@ public class WorkflowExecutor {
     }
 
     public void updateWorkflowPriority(String workflowId, int priority) {
-        try {
-            executionLockService.acquireLock(workflowId, 60000);
-            Workflow workflow = executionDAOFacade.getWorkflowById(workflowId, true);
-            if (workflow.getStatus().isTerminal()) {
-                throw new ApplicationException(CONFLICT, "Workflow id " + workflowId + " has ended, status cannot be updated.");
-            }
-            if (workflow.getPriority() == priority) {
-                return;        // same priority!
-            }
-            workflow.setPriority(priority);
-            executionDAOFacade.updateWorkflow(workflow);
-            List<Task> tasks = workflow.getTasks();
-            if (tasks != null && tasks.size() > 0) {
-                List<String> messageIds = new ArrayList<>();
-                for (Task task : tasks) {
-                    if (SCHEDULED == task.getStatus()) {
-                        messageIds.add(task.getTaskId());
+        Workflow workflow = executionDAOFacade.getWorkflowById(workflowId, true);
+        if (workflow.getStatus().isTerminal()) {
+            throw new ApplicationException(CONFLICT, "Workflow id " + workflowId + " has ended, status cannot be updated.");
+        }
+        if (workflow.getPriority() == priority) {
+            return;        // same priority!
+        }
+        workflow.setPriority(priority);
+        executionDAOFacade.updateWorkflow(workflow);
+        List<Task> tasks = workflow.getTasks();
+        if (tasks != null && tasks.size() > 0) {
+            List<String> messageIds = new ArrayList<>();
+            for (Task task : tasks) {
+                if (SCHEDULED == task.getStatus()) {
+                    messageIds.add(task.getTaskId());
+                }
+                // update subWorkflow priority
+                if (task.getTaskType().equals(TASK_TYPE_SUB_WORKFLOW)) {
+                    if (task.getSubWorkflowId() != null && !"".equals(task.getSubWorkflowId())) {
+                        updateWorkflowPriority(task.getSubWorkflowId(), priority);
                     }
                 }
-                if (messageIds.size() > 0) {
-                    queueDAO.updatePriority(messageIds, priority);
-                }
             }
-        } finally {
-            executionLockService.releaseLock(workflowId);
+            if (messageIds.size() > 0) {
+                queueDAO.updatePriority(messageIds, priority);
+            }
         }
     }
 
